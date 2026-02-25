@@ -1,0 +1,558 @@
+/**
+ * Styles for the Cricket Stadium Availability Map component library.
+ * Clean, production-ready CSS with accessibility and responsive design.
+ */
+
+/* =====================================================
+   Reset & Base Styles
+   ===================================================== */
+
+:root {
+  --color-available: #10b981; /* emerald-500 */
+  --color-limited: #f59e0b; /* amber-500 */
+  --color-full: #ef4444; /* red-500 */
+  --color-blocked: #9ca3af; /* gray-400 */
+  
+  --color-border: #e5e7eb; /* gray-200 */
+  --color-bg: #ffffff;
+  --color-text: #111827; /* gray-900 */
+  --color-text-light: #6b7280; /* gray-500 */
+  --color-shadow: rgba(0, 0, 0, 0.1);
+  
+  --spacing-xs: 0.25rem;
+  --spacing-sm: 0.5rem;
+  --spacing-md: 1rem;
+  --spacing-lg: 1.5rem;
+  --spacing-xl: 2rem;
+  
+  --radius-sm: 0.375rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  
+  --font-size-sm: 0.875rem;
+  --font-size-base: 1rem;
+  --font-size-lg: 1.125rem;
+  --font-size-xl: 1.25rem;
+  
+  --transition: all 0.2s ease;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+/* =====================================================
+   Main Container
+   ===================================================== */
+
+.stadium-map-container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+  padding: var(--spacing-lg);
+  background-color: #f9fafb;
+  border-radius: var(--radius-lg);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-size: var(--font-size-base);
+  color: var(--color-text);
+}
+
+/* =====================================================
+   Header & Controls
+   ===================================================== */
+
+.stadium-map-header {
+  display: flex;
+  gap: var(--spacing-md);
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.stadium-search-input {
+  flex: 1;
+  min-width: 200px;
+  padding: var(--spacing-md);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-base);
+  transition: var(--transition);
+}
+
+.stadium-search-input:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.stadium-checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  cursor: pointer;
+  user-select: none;
+  font-size: var(--font-size-sm);
+  color: var(--color-text);
+}
+
+.stadium-checkbox-label input {
+  cursor: pointer;
+  width: 18px;
+  height: 18px;
+}
+
+/* =====================================================
+   Legend
+   ===================================================== */
+
+.stadium-legend {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+  padding: var(--spacing-md);
+  background-color: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+
+.legend-title {
+  font-weight: 600;
+  font-size: var(--font-size-lg);
+  color: var(--color-text);
+}
+
+.legend-items {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: var(--spacing-md);
+}
+
+.legend-item {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-md);
+}
+
+.legend-color {
+  width: 24px;
+  height: 24px;
+  border-radius: var(--radius-sm);
+  flex-shrink: 0;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.legend-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.legend-status {
+  font-weight: 500;
+  font-size: var(--font-size-sm);
+  color: var(--color-text);
+}
+
+.legend-detail {
+  font-size: 0.75rem;
+  color: var(--color-text-light);
+}
+
+/* =====================================================
+   SVG Container (SVG Mode)
+   ===================================================== */
+
+.stadium-svg-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  background-color: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-lg);
+  overflow: auto;
+}
+
+.stadium-svg-container svg {
+  max-width: 100%;
+  height: auto;
+}
+
+/* =====================================================
+   Grid Container (Grid Mode)
+   ===================================================== */
+
+.stadium-grid-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: var(--spacing-md);
+  padding: var(--spacing-md);
+  background-color: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  min-height: 300px;
+}
+
+@media (max-width: 768px) {
+  .stadium-grid-container {
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  }
+}
+
+@media (max-width: 480px) {
+  .stadium-grid-container {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* =====================================================
+   Section Card (Grid Mode)
+   ===================================================== */
+
+.stadium-section-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-md);
+  background-color: #f3f4f6;
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: var(--transition);
+  user-select: none;
+  position: relative;
+  overflow: hidden;
+  
+  /* Keyboard accessible */
+  &:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.5);
+  }
+  
+  &:hover {
+    border-color: var(--color-text-light);
+    box-shadow: 0 4px 12px var(--color-shadow);
+    transform: translateY(-2px);
+  }
+}
+
+.stadium-section-card.hovered {
+  border-color: var(--color-text);
+  box-shadow: 0 4px 12px var(--color-shadow);
+}
+
+.stadium-section-card.selected {
+  border-color: var(--color-text);
+  border-width: 3px;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
+}
+
+.section-card-name {
+  font-weight: 600;
+  font-size: var(--font-size-base);
+  color: var(--color-text);
+  line-height: 1.3;
+  word-break: break-word;
+}
+
+.section-card-capacity {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-light);
+}
+
+.section-card-percentage {
+  font-size: var(--font-size-lg);
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.section-card-bar {
+  height: 6px;
+  background-color: var(--section-color, #10b981);
+  border-radius: var(--radius-sm);
+  margin-top: var(--spacing-xs);
+  transition: width 0.3s ease;
+}
+
+/* =====================================================
+   Tooltip
+   ===================================================== */
+
+.stadium-tooltip {
+  position: fixed;
+  background-color: rgba(0, 0, 0, 0.9);
+  color: white;
+  border-radius: var(--radius-md);
+  pointer-events: none;
+  z-index: 1000;
+  animation: tooltipFadeIn 0.15s ease;
+}
+
+@keyframes tooltipFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.tooltip-content {
+  padding: var(--spacing-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.tooltip-header {
+  font-weight: 600;
+  font-size: var(--font-size-base);
+  margin-bottom: var(--spacing-xs);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  padding-bottom: var(--spacing-xs);
+}
+
+.tooltip-row {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--spacing-md);
+  font-size: var(--font-size-sm);
+}
+
+.tooltip-label {
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.tooltip-value {
+  font-weight: 600;
+  color: white;
+}
+
+/* =====================================================
+   No Results
+   ===================================================== */
+
+.stadium-no-results {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: var(--spacing-xl);
+  color: var(--color-text-light);
+  font-size: var(--font-size-lg);
+}
+
+/* =====================================================
+   Demo/App Specific Styles
+   ===================================================== */
+
+.app-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: var(--spacing-xl);
+  background-color: #ffffff;
+}
+
+.app-header {
+  text-align: center;
+  margin-bottom: var(--spacing-xl);
+  padding-bottom: var(--spacing-lg);
+  border-bottom: 2px solid var(--color-border);
+}
+
+.app-header h1 {
+  margin: 0;
+  font-size: 2rem;
+  color: var(--color-text);
+  font-weight: 700;
+}
+
+.subtitle {
+  margin: var(--spacing-sm) 0 0 0;
+  color: var(--color-text-light);
+  font-size: var(--font-size-lg);
+}
+
+.demo-controls {
+  display: flex;
+  gap: var(--spacing-md);
+  flex-wrap: wrap;
+  margin-bottom: var(--spacing-lg);
+  padding: var(--spacing-md);
+  background-color: #f9fafb;
+  border-radius: var(--radius-md);
+  align-items: center;
+}
+
+.control-group {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.control-label {
+  font-weight: 500;
+  color: var(--color-text);
+}
+
+.control-select {
+  padding: var(--spacing-sm) var(--spacing-md);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-base);
+  background-color: var(--color-bg);
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.control-select:hover {
+  border-color: var(--color-text-light);
+}
+
+.control-select:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.control-button {
+  padding: var(--spacing-sm) var(--spacing-md);
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-base);
+  font-weight: 500;
+  cursor: pointer;
+  transition: var(--transition);
+  background-color: #3b82f6;
+  color: white;
+}
+
+.control-button:hover {
+  background-color: #2563eb;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+}
+
+.control-button:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.5);
+}
+
+.refresh-button {
+  background-color: #10b981;
+}
+
+.refresh-button:hover {
+  background-color: #059669;
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+}
+
+.clear-button {
+  background-color: #ef4444;
+}
+
+.clear-button:hover {
+  background-color: #dc2626;
+  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3);
+}
+
+.selected-info {
+  padding: var(--spacing-md);
+  background-color: #dbeafe;
+  border: 1px solid #93c5fd;
+  border-radius: var(--radius-md);
+  color: #1e40af;
+  font-size: var(--font-size-sm);
+}
+
+.map-wrapper {
+  margin: var(--spacing-lg) 0;
+}
+
+.demo-info {
+  margin-top: var(--spacing-xl);
+  padding: var(--spacing-lg);
+  background-color: #f9fafb;
+  border-radius: var(--radius-md);
+}
+
+.demo-info h2 {
+  margin-top: 0;
+  margin-bottom: var(--spacing-md);
+  font-size: var(--font-size-xl);
+  color: var(--color-text);
+}
+
+.demo-info ul {
+  margin: 0;
+  padding-left: var(--spacing-lg);
+  list-style: none;
+}
+
+.demo-info li {
+  margin: var(--spacing-sm) 0;
+  padding-left: var(--spacing-lg);
+  position: relative;
+}
+
+.demo-info li::before {
+  content: "→";
+  position: absolute;
+  left: 0;
+  color: #3b82f6;
+  font-weight: bold;
+}
+
+.code-block {
+  background-color: #1f2937;
+  color: #e5e7eb;
+  padding: var(--spacing-md);
+  border-radius: var(--radius-md);
+  overflow-x: auto;
+  font-size: 0.875rem;
+  font-family: "Monaco", "Courier New", monospace;
+  line-height: 1.5;
+  margin: 0;
+}
+
+/* =====================================================
+   Accessibility
+   ===================================================== */
+
+/* Focus visible for keyboard navigation */
+*:focus-visible {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Dark mode (optional) */
+@media (prefers-color-scheme: dark) {
+  .stadium-map-container {
+    background-color: #111827;
+    color: #f3f4f6;
+  }
+  
+  .stadium-search-input {
+    background-color: #1f2937;
+    border-color: #374151;
+    color: #f3f4f6;
+  }
+  
+  .legend-title {
+    color: #f3f4f6;
+  }
+  
+  .section-card-name {
+    color: #f3f4f6;
+  }
+}
