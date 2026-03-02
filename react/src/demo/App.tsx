@@ -19,6 +19,8 @@ export const App: React.FC = () => {
   const [topBoxCount, setTopBoxCount] = useState(initialCounts.top);
   const [bottomBoxCount, setBottomBoxCount] = useState(initialCounts.bottom);
   const [sections, setSections] = useState<Section[]>([]);
+  const schemaUsesBoxItems =
+    (LAYOUT_SCHEMAS[layoutKey].boxes.items?.length ?? 0) > 0;
 
   useEffect(() => {
     const counts = getInitialCounts(layoutKey);
@@ -30,6 +32,11 @@ export const App: React.FC = () => {
   const layoutConfig = useMemo<StadiumLayoutConfig>(() => {
     const base = LAYOUT_SCHEMAS[layoutKey];
     const placement = base.boxes.placement;
+    const usesItems = (base.boxes.items?.length ?? 0) > 0;
+
+    if (usesItems) {
+      return base;
+    }
 
     return {
       ...base,
@@ -111,7 +118,11 @@ export const App: React.FC = () => {
           </select>
         </div>
 
-        {layoutKey === "topBottomBoxes" ? (
+        {schemaUsesBoxItems ? (
+          <div className="control-group">
+            <span className="control-label">Boxes are schema-driven via boxes.items[]</span>
+          </div>
+        ) : layoutKey === "topBottomBoxes" ? (
           <>
             <div className="control-group">
               <label htmlFor="top-box-count" className="control-label">

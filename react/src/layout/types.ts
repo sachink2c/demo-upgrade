@@ -4,6 +4,11 @@ export type BoxPlacement = "left-right" | "top-bottom";
 export type BoxSide = "top" | "bottom" | "left" | "right";
 export type BoxSideCounts = Partial<Record<BoxSide, number>>;
 
+export interface BoxItemConfig {
+  type: BoxSide;
+  order: number;
+}
+
 export interface LayoutDimensions {
   width: number;
   height: number;
@@ -22,6 +27,7 @@ export interface BoxesLayout {
   placement: BoxPlacement;
   countPerSide: number;
   sideCounts: Record<BoxSide, number>;
+  items: BoxItemConfig[];
   width: number;
   height: number;
   gap: number;
@@ -35,8 +41,9 @@ export interface StadiumLayoutConfig {
     {
       countPerSide?: number;
       sideCounts?: BoxSideCounts;
+      items?: BoxItemConfig[];
     } &
-    Partial<Omit<BoxesLayout, "placement" | "countPerSide" | "sideCounts">>;
+    Partial<Omit<BoxesLayout, "placement" | "countPerSide" | "sideCounts" | "items">>;
 }
 
 export interface ResolvedStadiumLayoutConfig {

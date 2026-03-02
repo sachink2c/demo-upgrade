@@ -1,5 +1,7 @@
 import { Section } from "../types";
 import {
+  BoxItemConfig,
+  BoxSide,
   LayoutBuildResult,
   ResolvedStadiumLayoutConfig,
   StadiumLayoutConfig,
@@ -27,6 +29,7 @@ const DEFAULT_LAYOUT: ResolvedStadiumLayoutConfig = {
       left: 2,
       right: 2,
     },
+    items: [],
     width: 84,
     height: 56,
     gap: 14,
@@ -39,6 +42,15 @@ export function resolveLayoutConfig(
 ): ResolvedStadiumLayoutConfig {
   const resolvedCountPerSide = Math.max(1, config.boxes.countPerSide ?? DEFAULT_LAYOUT.boxes.countPerSide);
   const configuredSideCounts = config.boxes.sideCounts ?? {};
+  const resolvedSideCounts = {
+    top: sanitizeCount(configuredSideCounts.top, resolvedCountPerSide),
+    bottom: sanitizeCount(configuredSideCounts.bottom, resolvedCountPerSide),
+    left: sanitizeCount(configuredSideCounts.left, resolvedCountPerSide),
+    right: sanitizeCount(configuredSideCounts.right, resolvedCountPerSide),
+  };
+  const resolvedItems = (config.boxes.items ?? []).length > 0
+    ? sanitizeItems(config.boxes.items ?? [])
+    : buildItemsFromSideCounts(resolvedSideCounts);
 
   return {
     dimensions: {
@@ -53,12 +65,8 @@ export function resolveLayoutConfig(
       ...DEFAULT_LAYOUT.boxes,
       ...config.boxes,
       countPerSide: resolvedCountPerSide,
-      sideCounts: {
-        top: sanitizeCount(configuredSideCounts.top, resolvedCountPerSide),
-        bottom: sanitizeCount(configuredSideCounts.bottom, resolvedCountPerSide),
-        left: sanitizeCount(configuredSideCounts.left, resolvedCountPerSide),
-        right: sanitizeCount(configuredSideCounts.right, resolvedCountPerSide),
-      },
+      sideCounts: resolvedSideCounts,
+      items: resolvedItems,
     },
   };
 }
@@ -86,17 +94,14 @@ export function buildSectionsFromLayout(config: StadiumLayoutConfig): Section[] 
     });
   });
 
-  (["top", "bottom", "left", "right"] as const).forEach((side) => {
-    const count = layout.boxes.sideCounts[side];
-    for (let i = 1; i <= count; i += 1) {
-      sections.push({
-        id: `box-${side}-${i}`,
-        name: `${capitalize(side)} Box ${i}`,
-        capacity: 120,
-        filled: 0,
-        shapeKey: `box_${side}_${i}`,
-      });
-    }
+  layout.boxes.items.forEach((box) => {
+    sections.push({
+      id: `box-${box.type}-${box.order}`,
+      name: `${capitalize(box.type)} Box ${box.order}`,
+      capacity: 120,
+      filled: 0,
+      shapeKey: `box_${box.type}_${box.order}`,
+    });
   });
 
   return sections;
@@ -161,10 +166,14 @@ function buildBoxesMarkup(
 ): string[] {
   const { boxes, dimensions } = layout;
   const markup: string[] = [];
-  const topCount = boxes.sideCounts.top;
-  const bottomCount = boxes.sideCounts.bottom;
-  const leftCount = boxes.sideCounts.left;
-  const rightCount = boxes.sideCounts.right;
+  const topItems = getItemsForSide(boxes.items, "top");
+  const bottomItems = getItemsForSide(boxes.items, "bottom");
+  const leftItems = getItemsForSide(boxes.items, "left");
+  const rightItems = getItemsForSide(boxes.items, "right");
+  const topCount = topItems.length;
+  const bottomCount = bottomItems.length;
+  const leftCount = leftItems.length;
+  const rightCount = rightItems.length;
 
   const topTotalWidth = topCount * boxes.width + (topCount - 1) * boxes.gap;
   const bottomTotalWidth = bottomCount * boxes.width + (bottomCount - 1) * boxes.gap;
@@ -181,28 +190,28 @@ function buildBoxesMarkup(
   const leftX = centerX - dimensions.groundRadius - boxes.offsetFromGround - boxes.width;
   const rightX = centerX + dimensions.groundRadius + boxes.offsetFromGround;
 
-  for (let i = 0; i < topCount; i += 1) {
+  for (let i = 0; i < topItems.length; i += 1) {
     const x = topStartX + i * (boxes.width + boxes.gap);
-    const n = i + 1;
-    markup.push(`<rect id="box_top_${n}" x="${x}" y="${topY}" width="${boxes.width}" height="${boxes.height}" rx="5" />`);
+    const box = topItems[i];
+    markup.push(`<rect id="box_top_${box.order}" x="${x}" y="${topY}" width="${boxes.width}" height="${boxes.height}" rx="5" />`);
   }
 
-  for (let i = 0; i < bottomCount; i += 1) {
+  for (let i = 0; i < bottomItems.length; i += 1) {
     const x = bottomStartX + i * (boxes.width + boxes.gap);
-    const n = i + 1;
-    markup.push(`<rect id="box_bottom_${n}" x="${x}" y="${bottomY}" width="${boxes.width}" height="${boxes.height}" rx="5" />`);
+    const box = bottomItems[i];
+    markup.push(`<rect id="box_bottom_${box.order}" x="${x}" y="${bottomY}" width="${boxes.width}" height="${boxes.height}" rx="5" />`);
   }
 
-  for (let i = 0; i < leftCount; i += 1) {
+  for (let i = 0; i < leftItems.length; i += 1) {
     const y = leftStartY + i * (boxes.height + boxes.gap);
-    const n = i + 1;
-    markup.push(`<rect id="box_left_${n}" x="${leftX}" y="${y}" width="${boxes.width}" height="${boxes.height}" rx="5" />`);
+    const box = leftItems[i];
+    markup.push(`<rect id="box_left_${box.order}" x="${leftX}" y="${y}" width="${boxes.width}" height="${boxes.height}" rx="5" />`);
   }
 
-  for (let i = 0; i < rightCount; i += 1) {
+  for (let i = 0; i < rightItems.length; i += 1) {
     const y = rightStartY + i * (boxes.height + boxes.gap);
-    const n = i + 1;
-    markup.push(`<rect id="box_right_${n}" x="${rightX}" y="${y}" width="${boxes.width}" height="${boxes.height}" rx="5" />`);
+    const box = rightItems[i];
+    markup.push(`<rect id="box_right_${box.order}" x="${rightX}" y="${y}" width="${boxes.width}" height="${boxes.height}" rx="5" />`);
   }
 
   return markup;
@@ -217,4 +226,35 @@ function sanitizeCount(value: number | undefined, fallback: number): number {
     return fallback;
   }
   return Math.max(1, Math.floor(value));
+}
+
+function sanitizeItems(items: BoxItemConfig[]): BoxItemConfig[] {
+  return items
+    .filter((item) => isSide(item.type))
+    .map((item) => ({
+      type: item.type,
+      order: sanitizeCount(item.order, 1),
+    }));
+}
+
+function buildItemsFromSideCounts(sideCounts: Record<BoxSide, number>): BoxItemConfig[] {
+  const items: BoxItemConfig[] = [];
+
+  (["top", "bottom", "left", "right"] as const).forEach((side) => {
+    for (let order = 1; order <= sideCounts[side]; order += 1) {
+      items.push({ type: side, order });
+    }
+  });
+
+  return items;
+}
+
+function getItemsForSide(items: BoxItemConfig[], side: BoxSide): BoxItemConfig[] {
+  return items
+    .filter((item) => item.type === side)
+    .sort((a, b) => a.order - b.order);
+}
+
+function isSide(value: unknown): value is BoxSide {
+  return value === "top" || value === "bottom" || value === "left" || value === "right";
 }

@@ -26,13 +26,20 @@ export const LAYOUT_SCHEMAS: Record<string, StadiumLayoutConfig> = {
     },
     boxes: {
       placement: "top-bottom",
-      countPerSide: 4,
-      sideCounts: {
-        top: 4,
-        bottom: 2,
-        left: 3,
-        right: 2,
-      },
+      items: [
+        { type: "top", order: 1 },
+        { type: "top", order: 2 },
+        { type: "top", order: 3 },
+        { type: "top", order: 4 },
+        { type: "bottom", order: 1 },
+        { type: "bottom", order: 2 },
+         { type: "bottom", order: 3 },
+        { type: "left", order: 1 },
+        { type: "left", order: 2 },
+        { type: "left", order: 3 },
+        { type: "right", order: 1 },
+        { type: "right", order: 2 },
+      ],
     },
   },
 };
