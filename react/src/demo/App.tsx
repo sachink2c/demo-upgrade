@@ -14,10 +14,18 @@ export const App: React.FC = () => {
   const [mode, setMode] = useState<"svg" | "grid">("svg");
   const [selectedSectionId, setSelectedSectionId] = useState<string | null>(null);
   const [layoutKey, setLayoutKey] = useState<keyof typeof LAYOUT_SCHEMAS>("topBottomBoxes");
-  const [boxCount, setBoxCount] = useState(3);
-  const [topBoxCount, setTopBoxCount] = useState(3);
-  const [bottomBoxCount, setBottomBoxCount] = useState(2);
+  const initialCounts = getInitialCounts("topBottomBoxes");
+  const [boxCount, setBoxCount] = useState(initialCounts.countPerSide);
+  const [topBoxCount, setTopBoxCount] = useState(initialCounts.top);
+  const [bottomBoxCount, setBottomBoxCount] = useState(initialCounts.bottom);
   const [sections, setSections] = useState<Section[]>([]);
+
+  useEffect(() => {
+    const counts = getInitialCounts(layoutKey);
+    setBoxCount(counts.countPerSide);
+    setTopBoxCount(counts.top);
+    setBottomBoxCount(counts.bottom);
+  }, [layoutKey]);
 
   const layoutConfig = useMemo<StadiumLayoutConfig>(() => {
     const base = LAYOUT_SCHEMAS[layoutKey];
@@ -201,6 +209,22 @@ function randomizeSections(baseSections: Section[]): Section[] {
 function clampNumber(value: number, min: number, max: number): number {
   if (!Number.isFinite(value)) return min;
   return Math.min(max, Math.max(min, value));
+}
+
+function getInitialCounts(layoutKey: keyof typeof LAYOUT_SCHEMAS): {
+  countPerSide: number;
+  top: number;
+  bottom: number;
+} {
+  const schema = LAYOUT_SCHEMAS[layoutKey];
+  const fallback = Math.max(1, schema.boxes.countPerSide ?? 1);
+  const sideCounts = schema.boxes.sideCounts ?? {};
+
+  return {
+    countPerSide: fallback,
+    top: Math.max(1, sideCounts.top ?? fallback),
+    bottom: Math.max(1, sideCounts.bottom ?? fallback),
+  };
 }
 
 export default App;

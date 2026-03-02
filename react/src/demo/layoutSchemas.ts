@@ -26,9 +26,9 @@ export const LAYOUT_SCHEMAS: Record<string, StadiumLayoutConfig> = {
     },
     boxes: {
       placement: "top-bottom",
-      countPerSide: 3,
+      countPerSide: 4,
       sideCounts: {
-        top: 3,
+        top: 4,
         bottom: 2,
         left: 3,
         right: 2,
