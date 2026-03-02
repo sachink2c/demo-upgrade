@@ -1,4 +1,4 @@
-import { Section } from "../types";
+import { Section, SectionStatus } from "../types";
 
 export type BoxPlacement = "left-right" | "top-bottom";
 export type BoxSide = "top" | "bottom" | "left" | "right";
@@ -7,6 +7,10 @@ export type BoxSideCounts = Partial<Record<BoxSide, number>>;
 export interface BoxItemConfig {
   type: BoxSide;
   order: number;
+  name?: string;
+  capacity?: number;
+  status?: SectionStatus;
+  available?: number;
 }
 
 export interface LayoutDimensions {

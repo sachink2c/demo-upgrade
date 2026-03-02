@@ -32,7 +32,7 @@ export function getComputedStatus(
   percentage: number,
   thresholds: Thresholds = DEFAULT_THRESHOLDS
 ): SectionStatus {
-  if (section.status === "BLOCKED") return "BLOCKED";
+  if (section.status) return section.status;
 
   if (percentage >= thresholds.fullPct) return "FULL";
   if (percentage >= thresholds.limitedPct) return "LIMITED";

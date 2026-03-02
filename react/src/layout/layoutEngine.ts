@@ -95,11 +95,19 @@ export function buildSectionsFromLayout(config: StadiumLayoutConfig): Section[] 
   });
 
   layout.boxes.items.forEach((box) => {
+    const capacity = clampInteger(
+      box.capacity ?? getAutoCapacity(layout, box),
+      1,
+      100000
+    );
+    const available = clampInteger(box.available ?? Math.floor(capacity * 0.6), 0, capacity);
+
     sections.push({
       id: `box-${box.type}-${box.order}`,
-      name: `${capitalize(box.type)} Box ${box.order}`,
-      capacity: 120,
-      filled: 0,
+      name: box.name ?? `${capitalize(box.type)} Box ${box.order}`,
+      capacity,
+      filled: capacity - available,
+      status: box.status,
       shapeKey: `box_${box.type}_${box.order}`,
     });
   });
@@ -234,6 +242,10 @@ function sanitizeItems(items: BoxItemConfig[]): BoxItemConfig[] {
     .map((item) => ({
       type: item.type,
       order: sanitizeCount(item.order, 1),
+      name: item.name,
+      capacity: typeof item.capacity === "number" ? sanitizeCount(item.capacity, 1) : undefined,
+      available: typeof item.available === "number" ? Math.max(0, Math.floor(item.available)) : undefined,
+      status: item.status,
     }));
 }
 
@@ -257,4 +269,19 @@ function getItemsForSide(items: BoxItemConfig[], side: BoxSide): BoxItemConfig[]
 
 function isSide(value: unknown): value is BoxSide {
   return value === "top" || value === "bottom" || value === "left" || value === "right";
+}
+
+function clampInteger(value: number, min: number, max: number): number {
+  if (!Number.isFinite(value)) return min;
+  const rounded = Math.floor(value);
+  return Math.max(min, Math.min(max, rounded));
+}
+
+function getAutoCapacity(
+  layout: ResolvedStadiumLayoutConfig,
+  _box: BoxItemConfig
+): number {
+  // Derive a consistent capacity from rendered box size.
+  const area = layout.boxes.width * layout.boxes.height;
+  return Math.max(20, Math.round(area / 35));
 }

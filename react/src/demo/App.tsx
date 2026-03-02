@@ -57,7 +57,7 @@ export const App: React.FC = () => {
   }, [bottomBoxCount, boxCount, layoutKey, topBoxCount]);
 
   useEffect(() => {
-    setSections(randomizeSections(buildSectionsFromLayout(layoutConfig)));
+    setSections(buildSectionsFromLayout(layoutConfig));
     setSelectedSectionId(null);
   }, [layoutConfig]);
 
@@ -74,7 +74,7 @@ export const App: React.FC = () => {
   };
 
   const handleRefreshMockData = () => {
-    setSections((previous) => randomizeSections(previous));
+    setSections(buildSectionsFromLayout(layoutConfig));
     setSelectedSectionId(null);
   };
 
@@ -173,11 +173,8 @@ export const App: React.FC = () => {
           </div>
         )}
 
-        <button
-          onClick={handleRefreshMockData}
-          className="control-button refresh-button"
-        >
-          Refresh Mock Data
+        <button onClick={handleRefreshMockData} className="control-button refresh-button">
+          Reload Schema Data
         </button>
 
         <button
@@ -209,13 +206,6 @@ export const App: React.FC = () => {
     </div>
   );
 };
-
-function randomizeSections(baseSections: Section[]): Section[] {
-  return baseSections.map((section) => ({
-    ...section,
-    filled: Math.floor(Math.random() * (section.capacity + 1)),
-  }));
-}
 
 function clampNumber(value: number, min: number, max: number): number {
   if (!Number.isFinite(value)) return min;
