@@ -13,21 +13,33 @@ const customThresholds: Thresholds = {
 export const App: React.FC = () => {
   const [mode, setMode] = useState<"svg" | "grid">("svg");
   const [selectedSectionId, setSelectedSectionId] = useState<string | null>(null);
-  const [layoutKey, setLayoutKey] = useState<keyof typeof LAYOUT_SCHEMAS>("leftRightBoxes");
+  const [layoutKey, setLayoutKey] = useState<keyof typeof LAYOUT_SCHEMAS>("topBottomBoxes");
   const [boxCount, setBoxCount] = useState(3);
+  const [topBoxCount, setTopBoxCount] = useState(3);
+  const [bottomBoxCount, setBottomBoxCount] = useState(2);
   const [sections, setSections] = useState<Section[]>([]);
 
   const layoutConfig = useMemo<StadiumLayoutConfig>(() => {
     const base = LAYOUT_SCHEMAS[layoutKey];
+    const placement = base.boxes.placement;
 
     return {
       ...base,
       boxes: {
         ...base.boxes,
         countPerSide: boxCount,
+        ...(placement === "top-bottom"
+          ? {
+              sideCounts: {
+                ...(base.boxes.sideCounts ?? {}),
+                top: topBoxCount,
+                bottom: bottomBoxCount,
+              },
+            }
+          : {}),
       },
     };
-  }, [boxCount, layoutKey]);
+  }, [bottomBoxCount, boxCount, layoutKey, topBoxCount]);
 
   useEffect(() => {
     setSections(randomizeSections(buildSectionsFromLayout(layoutConfig)));
@@ -86,25 +98,61 @@ export const App: React.FC = () => {
             }
             className="control-select"
           >
-            <option value="leftRightBoxes">Boxes Left/Right</option>
             <option value="topBottomBoxes">Boxes Top/Bottom</option>
+            <option value="leftRightBoxes">Boxes Left/Right + Top/Bottom Stands</option>
           </select>
         </div>
 
-        <div className="control-group">
-          <label htmlFor="box-count" className="control-label">
-            Boxes Per Side:
-          </label>
-          <input
-            id="box-count"
-            type="number"
-            min={1}
-            max={8}
-            value={boxCount}
-            onChange={(e) => setBoxCount(clampNumber(Number(e.target.value), 1, 8))}
-            className="control-select"
-          />
-        </div>
+        {layoutKey === "topBottomBoxes" ? (
+          <>
+            <div className="control-group">
+              <label htmlFor="top-box-count" className="control-label">
+                Top Boxes:
+              </label>
+              <input
+                id="top-box-count"
+                type="number"
+                min={1}
+                max={8}
+                value={topBoxCount}
+                onChange={(e) => setTopBoxCount(clampNumber(Number(e.target.value), 1, 8))}
+                className="control-select"
+              />
+            </div>
+
+            <div className="control-group">
+              <label htmlFor="bottom-box-count" className="control-label">
+                Bottom Boxes:
+              </label>
+              <input
+                id="bottom-box-count"
+                type="number"
+                min={1}
+                max={8}
+                value={bottomBoxCount}
+                onChange={(e) =>
+                  setBottomBoxCount(clampNumber(Number(e.target.value), 1, 8))
+                }
+                className="control-select"
+              />
+            </div>
+          </>
+        ) : (
+          <div className="control-group">
+            <label htmlFor="box-count" className="control-label">
+              Boxes Per Side:
+            </label>
+            <input
+              id="box-count"
+              type="number"
+              min={1}
+              max={8}
+              value={boxCount}
+              onChange={(e) => setBoxCount(clampNumber(Number(e.target.value), 1, 8))}
+              className="control-select"
+            />
+          </div>
+        )}
 
         <button
           onClick={handleRefreshMockData}

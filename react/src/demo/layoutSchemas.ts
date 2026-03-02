@@ -14,15 +14,25 @@ export const LAYOUT_SCHEMAS: Record<string, StadiumLayoutConfig> = {
     },
   },
   topBottomBoxes: {
+    dimensions: {
+      height: 620,
+      groundRadius: 155,
+    },
     stands: {
       north: false,
       south: false,
-      east: true,
-      west: true,
+      east: false,
+      west: false,
     },
     boxes: {
       placement: "top-bottom",
-      countPerSide: 4,
+      countPerSide: 3,
+      sideCounts: {
+        top: 3,
+        bottom: 2,
+        left: 3,
+        right: 2,
+      },
     },
   },
 };

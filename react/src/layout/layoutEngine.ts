@@ -9,7 +9,7 @@ const DEFAULT_LAYOUT: ResolvedStadiumLayoutConfig = {
   dimensions: {
     width: 600,
     height: 500,
-    groundRadius: 100,
+    groundRadius: 125,
   },
   stands: {
     north: true,
@@ -21,6 +21,12 @@ const DEFAULT_LAYOUT: ResolvedStadiumLayoutConfig = {
   boxes: {
     placement: "left-right",
     countPerSide: 2,
+    sideCounts: {
+      top: 2,
+      bottom: 2,
+      left: 2,
+      right: 2,
+    },
     width: 84,
     height: 56,
     gap: 14,
@@ -31,6 +37,9 @@ const DEFAULT_LAYOUT: ResolvedStadiumLayoutConfig = {
 export function resolveLayoutConfig(
   config: StadiumLayoutConfig
 ): ResolvedStadiumLayoutConfig {
+  const resolvedCountPerSide = Math.max(1, config.boxes.countPerSide ?? DEFAULT_LAYOUT.boxes.countPerSide);
+  const configuredSideCounts = config.boxes.sideCounts ?? {};
+
   return {
     dimensions: {
       ...DEFAULT_LAYOUT.dimensions,
@@ -43,7 +52,13 @@ export function resolveLayoutConfig(
     boxes: {
       ...DEFAULT_LAYOUT.boxes,
       ...config.boxes,
-      countPerSide: Math.max(1, config.boxes.countPerSide),
+      countPerSide: resolvedCountPerSide,
+      sideCounts: {
+        top: sanitizeCount(configuredSideCounts.top, resolvedCountPerSide),
+        bottom: sanitizeCount(configuredSideCounts.bottom, resolvedCountPerSide),
+        left: sanitizeCount(configuredSideCounts.left, resolvedCountPerSide),
+        right: sanitizeCount(configuredSideCounts.right, resolvedCountPerSide),
+      },
     },
   };
 }
@@ -71,12 +86,9 @@ export function buildSectionsFromLayout(config: StadiumLayoutConfig): Section[] 
     });
   });
 
-  const sides = layout.boxes.placement === "left-right"
-    ? (["left", "right"] as const)
-    : (["top", "bottom"] as const);
-
-  sides.forEach((side) => {
-    for (let i = 1; i <= layout.boxes.countPerSide; i += 1) {
+  (["top", "bottom", "left", "right"] as const).forEach((side) => {
+    const count = layout.boxes.sideCounts[side];
+    for (let i = 1; i <= count; i += 1) {
       sections.push({
         id: `box-${side}-${i}`,
         name: `${capitalize(side)} Box ${i}`,
@@ -149,37 +161,48 @@ function buildBoxesMarkup(
 ): string[] {
   const { boxes, dimensions } = layout;
   const markup: string[] = [];
+  const topCount = boxes.sideCounts.top;
+  const bottomCount = boxes.sideCounts.bottom;
+  const leftCount = boxes.sideCounts.left;
+  const rightCount = boxes.sideCounts.right;
 
-  if (boxes.placement === "left-right") {
-    const totalHeight =
-      boxes.countPerSide * boxes.height + (boxes.countPerSide - 1) * boxes.gap;
-    const startY = centerY - totalHeight / 2;
+  const topTotalWidth = topCount * boxes.width + (topCount - 1) * boxes.gap;
+  const bottomTotalWidth = bottomCount * boxes.width + (bottomCount - 1) * boxes.gap;
+  const leftTotalHeight = leftCount * boxes.height + (leftCount - 1) * boxes.gap;
+  const rightTotalHeight = rightCount * boxes.height + (rightCount - 1) * boxes.gap;
 
-    const leftX = centerX - dimensions.groundRadius - boxes.offsetFromGround - boxes.width;
-    const rightX = centerX + dimensions.groundRadius + boxes.offsetFromGround;
-
-    for (let i = 0; i < boxes.countPerSide; i += 1) {
-      const y = startY + i * (boxes.height + boxes.gap);
-      const n = i + 1;
-      markup.push(`<rect id="box_left_${n}" x="${leftX}" y="${y}" width="${boxes.width}" height="${boxes.height}" rx="5" />`);
-      markup.push(`<rect id="box_right_${n}" x="${rightX}" y="${y}" width="${boxes.width}" height="${boxes.height}" rx="5" />`);
-    }
-
-    return markup;
-  }
-
-  const totalWidth =
-    boxes.countPerSide * boxes.width + (boxes.countPerSide - 1) * boxes.gap;
-  const startX = centerX - totalWidth / 2;
+  const topStartX = centerX - topTotalWidth / 2;
+  const bottomStartX = centerX - bottomTotalWidth / 2;
+  const leftStartY = centerY - leftTotalHeight / 2;
+  const rightStartY = centerY - rightTotalHeight / 2;
 
   const topY = centerY - dimensions.groundRadius - boxes.offsetFromGround - boxes.height;
   const bottomY = centerY + dimensions.groundRadius + boxes.offsetFromGround;
+  const leftX = centerX - dimensions.groundRadius - boxes.offsetFromGround - boxes.width;
+  const rightX = centerX + dimensions.groundRadius + boxes.offsetFromGround;
 
-  for (let i = 0; i < boxes.countPerSide; i += 1) {
-    const x = startX + i * (boxes.width + boxes.gap);
+  for (let i = 0; i < topCount; i += 1) {
+    const x = topStartX + i * (boxes.width + boxes.gap);
     const n = i + 1;
     markup.push(`<rect id="box_top_${n}" x="${x}" y="${topY}" width="${boxes.width}" height="${boxes.height}" rx="5" />`);
+  }
+
+  for (let i = 0; i < bottomCount; i += 1) {
+    const x = bottomStartX + i * (boxes.width + boxes.gap);
+    const n = i + 1;
     markup.push(`<rect id="box_bottom_${n}" x="${x}" y="${bottomY}" width="${boxes.width}" height="${boxes.height}" rx="5" />`);
+  }
+
+  for (let i = 0; i < leftCount; i += 1) {
+    const y = leftStartY + i * (boxes.height + boxes.gap);
+    const n = i + 1;
+    markup.push(`<rect id="box_left_${n}" x="${leftX}" y="${y}" width="${boxes.width}" height="${boxes.height}" rx="5" />`);
+  }
+
+  for (let i = 0; i < rightCount; i += 1) {
+    const y = rightStartY + i * (boxes.height + boxes.gap);
+    const n = i + 1;
+    markup.push(`<rect id="box_right_${n}" x="${rightX}" y="${y}" width="${boxes.width}" height="${boxes.height}" rx="5" />`);
   }
 
   return markup;
@@ -187,4 +210,11 @@ function buildBoxesMarkup(
 
 function capitalize(value: string): string {
   return value.charAt(0).toUpperCase() + value.slice(1);
+}
+
+function sanitizeCount(value: number | undefined, fallback: number): number {
+  if (typeof value !== "number" || !Number.isFinite(value)) {
+    return fallback;
+  }
+  return Math.max(1, Math.floor(value));
 }
