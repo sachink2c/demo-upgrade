@@ -103,12 +103,14 @@ export function buildSectionsFromLayout(config: StadiumLayoutConfig): Section[] 
     const available = clampInteger(box.available ?? Math.floor(capacity * 0.6), 0, capacity);
 
     sections.push({
-      id: `box-${box.type}-${box.order}`,
-      name: box.name ?? `${capitalize(box.type)} Box ${box.order}`,
+      id: getBoxDomId(box),
+      name:
+        box.name ??
+        `${capitalize(box.type)} Row ${box.row ?? 1} Box ${box.order}`,
       capacity,
       filled: capacity - available,
       status: box.status,
-      shapeKey: `box_${box.type}_${box.order}`,
+      shapeKey: getBoxShapeKey(box),
     });
   });
 
@@ -174,53 +176,34 @@ function buildBoxesMarkup(
 ): string[] {
   const { boxes, dimensions } = layout;
   const markup: string[] = [];
-  const topItems = getItemsForSide(boxes.items, "top");
-  const bottomItems = getItemsForSide(boxes.items, "bottom");
-  const leftItems = getItemsForSide(boxes.items, "left");
-  const rightItems = getItemsForSide(boxes.items, "right");
-  const topCount = topItems.length;
-  const bottomCount = bottomItems.length;
-  const leftCount = leftItems.length;
-  const rightCount = rightItems.length;
+  const topRows = groupItemsByRow(getItemsForSide(boxes.items, "top"));
+  const bottomRows = groupItemsByRow(getItemsForSide(boxes.items, "bottom"));
+  const leftRows = groupItemsByRow(getItemsForSide(boxes.items, "left"));
+  const rightRows = groupItemsByRow(getItemsForSide(boxes.items, "right"));
 
-  const topTotalWidth = topCount * boxes.width + (topCount - 1) * boxes.gap;
-  const bottomTotalWidth = bottomCount * boxes.width + (bottomCount - 1) * boxes.gap;
-  const leftTotalHeight = leftCount * boxes.height + (leftCount - 1) * boxes.gap;
-  const rightTotalHeight = rightCount * boxes.height + (rightCount - 1) * boxes.gap;
+  const topBaseY = centerY - dimensions.groundRadius - boxes.offsetFromGround - boxes.height;
+  topRows.forEach((rowItems, rowIndex) => {
+    const rowY = topBaseY - rowIndex * (boxes.height + boxes.gap);
+    renderTopBottomRow(markup, rowItems, centerX, rowY, boxes.width, boxes.height, boxes.gap);
+  });
 
-  const topStartX = centerX - topTotalWidth / 2;
-  const bottomStartX = centerX - bottomTotalWidth / 2;
-  const leftStartY = centerY - leftTotalHeight / 2;
-  const rightStartY = centerY - rightTotalHeight / 2;
+  const bottomBaseY = centerY + dimensions.groundRadius + boxes.offsetFromGround;
+  bottomRows.forEach((rowItems, rowIndex) => {
+    const rowY = bottomBaseY + rowIndex * (boxes.height + boxes.gap);
+    renderTopBottomRow(markup, rowItems, centerX, rowY, boxes.width, boxes.height, boxes.gap);
+  });
 
-  const topY = centerY - dimensions.groundRadius - boxes.offsetFromGround - boxes.height;
-  const bottomY = centerY + dimensions.groundRadius + boxes.offsetFromGround;
-  const leftX = centerX - dimensions.groundRadius - boxes.offsetFromGround - boxes.width;
-  const rightX = centerX + dimensions.groundRadius + boxes.offsetFromGround;
+  const leftBaseX = centerX - dimensions.groundRadius - boxes.offsetFromGround - boxes.width;
+  leftRows.forEach((rowItems, rowIndex) => {
+    const rowX = leftBaseX - rowIndex * (boxes.width + boxes.gap);
+    renderLeftRightRow(markup, rowItems, rowX, centerY, boxes.width, boxes.height, boxes.gap);
+  });
 
-  for (let i = 0; i < topItems.length; i += 1) {
-    const x = topStartX + i * (boxes.width + boxes.gap);
-    const box = topItems[i];
-    markup.push(`<rect id="box_top_${box.order}" x="${x}" y="${topY}" width="${boxes.width}" height="${boxes.height}" rx="5" />`);
-  }
-
-  for (let i = 0; i < bottomItems.length; i += 1) {
-    const x = bottomStartX + i * (boxes.width + boxes.gap);
-    const box = bottomItems[i];
-    markup.push(`<rect id="box_bottom_${box.order}" x="${x}" y="${bottomY}" width="${boxes.width}" height="${boxes.height}" rx="5" />`);
-  }
-
-  for (let i = 0; i < leftItems.length; i += 1) {
-    const y = leftStartY + i * (boxes.height + boxes.gap);
-    const box = leftItems[i];
-    markup.push(`<rect id="box_left_${box.order}" x="${leftX}" y="${y}" width="${boxes.width}" height="${boxes.height}" rx="5" />`);
-  }
-
-  for (let i = 0; i < rightItems.length; i += 1) {
-    const y = rightStartY + i * (boxes.height + boxes.gap);
-    const box = rightItems[i];
-    markup.push(`<rect id="box_right_${box.order}" x="${rightX}" y="${y}" width="${boxes.width}" height="${boxes.height}" rx="5" />`);
-  }
+  const rightBaseX = centerX + dimensions.groundRadius + boxes.offsetFromGround;
+  rightRows.forEach((rowItems, rowIndex) => {
+    const rowX = rightBaseX + rowIndex * (boxes.width + boxes.gap);
+    renderLeftRightRow(markup, rowItems, rowX, centerY, boxes.width, boxes.height, boxes.gap);
+  });
 
   return markup;
 }
@@ -241,6 +224,7 @@ function sanitizeItems(items: BoxItemConfig[]): BoxItemConfig[] {
     .filter((item) => isSide(item.type))
     .map((item) => ({
       type: item.type,
+      row: sanitizeCount(item.row, 1),
       order: sanitizeCount(item.order, 1),
       name: item.name,
       capacity: typeof item.capacity === "number" ? sanitizeCount(item.capacity, 1) : undefined,
@@ -254,7 +238,7 @@ function buildItemsFromSideCounts(sideCounts: Record<BoxSide, number>): BoxItemC
 
   (["top", "bottom", "left", "right"] as const).forEach((side) => {
     for (let order = 1; order <= sideCounts[side]; order += 1) {
-      items.push({ type: side, order });
+      items.push({ type: side, row: 1, order });
     }
   });
 
@@ -264,7 +248,11 @@ function buildItemsFromSideCounts(sideCounts: Record<BoxSide, number>): BoxItemC
 function getItemsForSide(items: BoxItemConfig[], side: BoxSide): BoxItemConfig[] {
   return items
     .filter((item) => item.type === side)
-    .sort((a, b) => a.order - b.order);
+    .sort((a, b) => {
+      const rowDelta = (a.row ?? 1) - (b.row ?? 1);
+      if (rowDelta !== 0) return rowDelta;
+      return a.order - b.order;
+    });
 }
 
 function isSide(value: unknown): value is BoxSide {
@@ -284,4 +272,70 @@ function getAutoCapacity(
   // Derive a consistent capacity from rendered box size.
   const area = layout.boxes.width * layout.boxes.height;
   return Math.max(20, Math.round(area / 35));
+}
+
+function groupItemsByRow(items: BoxItemConfig[]): BoxItemConfig[][] {
+  const groups = new Map<number, BoxItemConfig[]>();
+
+  items.forEach((item) => {
+    const row = item.row ?? 1;
+    const existing = groups.get(row);
+    if (existing) {
+      existing.push(item);
+      return;
+    }
+    groups.set(row, [item]);
+  });
+
+  return [...groups.entries()]
+    .sort(([a], [b]) => a - b)
+    .map(([, rowItems]) => rowItems.sort((a, b) => a.order - b.order));
+}
+
+function renderTopBottomRow(
+  markup: string[],
+  items: BoxItemConfig[],
+  centerX: number,
+  y: number,
+  boxWidth: number,
+  boxHeight: number,
+  gap: number
+): void {
+  const totalWidth = items.length * boxWidth + (items.length - 1) * gap;
+  const startX = centerX - totalWidth / 2;
+
+  items.forEach((box, index) => {
+    const x = startX + index * (boxWidth + gap);
+    markup.push(
+      `<rect id="${getBoxShapeKey(box)}" x="${x}" y="${y}" width="${boxWidth}" height="${boxHeight}" rx="5" />`
+    );
+  });
+}
+
+function renderLeftRightRow(
+  markup: string[],
+  items: BoxItemConfig[],
+  x: number,
+  centerY: number,
+  boxWidth: number,
+  boxHeight: number,
+  gap: number
+): void {
+  const totalHeight = items.length * boxHeight + (items.length - 1) * gap;
+  const startY = centerY - totalHeight / 2;
+
+  items.forEach((box, index) => {
+    const y = startY + index * (boxHeight + gap);
+    markup.push(
+      `<rect id="${getBoxShapeKey(box)}" x="${x}" y="${y}" width="${boxWidth}" height="${boxHeight}" rx="5" />`
+    );
+  });
+}
+
+function getBoxShapeKey(box: BoxItemConfig): string {
+  return `box_${box.type}_r${box.row ?? 1}_o${box.order}`;
+}
+
+function getBoxDomId(box: BoxItemConfig): string {
+  return `box-${box.type}-r${box.row ?? 1}-o${box.order}`;
 }

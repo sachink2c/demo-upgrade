@@ -6,6 +6,7 @@ export type BoxSideCounts = Partial<Record<BoxSide, number>>;
 
 export interface BoxItemConfig {
   type: BoxSide;
+  row?: number;
   order: number;
   name?: string;
   capacity?: number;
