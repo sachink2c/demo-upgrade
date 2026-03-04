@@ -210,10 +210,25 @@ function buildBoxesMarkup(
     renderLeftRightRow(markup, rowItems, rowX, centerY, boxes.width, boxes.height, boxes.gap);
   });
 
+  const topRowBounds = getCenteredRowBounds(topRows[0]?.length ?? 0, centerX, boxes.width, boxes.gap);
+  const bottomRowBounds = getCenteredRowBounds(bottomRows[0]?.length ?? 0, centerX, boxes.width, boxes.gap);
+  const topLeftBaseX = topRowBounds
+    ? Math.min(leftBaseX, topRowBounds.left - boxes.gap - boxes.width)
+    : leftBaseX;
+  const topRightBaseX = topRowBounds
+    ? Math.max(rightBaseX, topRowBounds.right + boxes.gap)
+    : rightBaseX;
+  const bottomLeftBaseX = bottomRowBounds
+    ? Math.min(leftBaseX, bottomRowBounds.left - boxes.gap - boxes.width)
+    : leftBaseX;
+  const bottomRightBaseX = bottomRowBounds
+    ? Math.max(rightBaseX, bottomRowBounds.right + boxes.gap)
+    : rightBaseX;
+
   renderCornerItems(
     markup,
     topLeftItems,
-    leftBaseX,
+    topLeftBaseX,
     topBaseY,
     -1,
     -1,
@@ -224,7 +239,7 @@ function buildBoxesMarkup(
   renderCornerItems(
     markup,
     topRightItems,
-    rightBaseX,
+    topRightBaseX,
     topBaseY,
     1,
     -1,
@@ -235,7 +250,7 @@ function buildBoxesMarkup(
   renderCornerItems(
     markup,
     bottomLeftItems,
-    leftBaseX,
+    bottomLeftBaseX,
     bottomBaseY,
     -1,
     1,
@@ -246,7 +261,7 @@ function buildBoxesMarkup(
   renderCornerItems(
     markup,
     bottomRightItems,
-    rightBaseX,
+    bottomRightBaseX,
     bottomBaseY,
     1,
     1,
@@ -389,6 +404,21 @@ function renderLeftRightRow(
       `<rect id="${getBoxShapeKey(box)}" x="${x}" y="${y}" width="${boxWidth}" height="${boxHeight}" rx="5" />`
     );
   });
+}
+
+function getCenteredRowBounds(
+  count: number,
+  centerX: number,
+  boxWidth: number,
+  gap: number
+): { left: number; right: number } | null {
+  if (count <= 0) return null;
+  const totalWidth = count * boxWidth + (count - 1) * gap;
+  const left = centerX - totalWidth / 2;
+  return {
+    left,
+    right: left + totalWidth,
+  };
 }
 
 function renderCornerItems(
