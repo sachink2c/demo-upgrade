@@ -1,8 +1,10 @@
 import { Section, SectionStatus } from "../types";
 
 export type BoxPlacement = "left-right" | "top-bottom";
-export type BoxSide = "top" | "bottom" | "left" | "right";
-export type BoxSideCounts = Partial<Record<BoxSide, number>>;
+export type BoxEdgeSide = "top" | "bottom" | "left" | "right";
+export type BoxCornerSide = "top-left" | "top-right" | "bottom-left" | "bottom-right";
+export type BoxSide = BoxEdgeSide | BoxCornerSide;
+export type BoxSideCounts = Partial<Record<BoxEdgeSide, number>>;
 
 export interface BoxItemConfig {
   type: BoxSide;
@@ -31,7 +33,7 @@ export interface StandsLayout {
 export interface BoxesLayout {
   placement: BoxPlacement;
   countPerSide: number;
-  sideCounts: Record<BoxSide, number>;
+  sideCounts: Record<BoxEdgeSide, number>;
   items: BoxItemConfig[];
   width: number;
   height: number;

@@ -1,6 +1,7 @@
 import { Section } from "../types";
 import {
   BoxItemConfig,
+  BoxEdgeSide,
   BoxSide,
   LayoutBuildResult,
   ResolvedStadiumLayoutConfig,
@@ -180,6 +181,10 @@ function buildBoxesMarkup(
   const bottomRows = groupItemsByRow(getItemsForSide(boxes.items, "bottom"));
   const leftRows = groupItemsByRow(getItemsForSide(boxes.items, "left"));
   const rightRows = groupItemsByRow(getItemsForSide(boxes.items, "right"));
+  const topLeftItems = getItemsForSide(boxes.items, "top-left");
+  const topRightItems = getItemsForSide(boxes.items, "top-right");
+  const bottomLeftItems = getItemsForSide(boxes.items, "bottom-left");
+  const bottomRightItems = getItemsForSide(boxes.items, "bottom-right");
 
   const topBaseY = centerY - dimensions.groundRadius - boxes.offsetFromGround - boxes.height;
   topRows.forEach((rowItems, rowIndex) => {
@@ -204,6 +209,51 @@ function buildBoxesMarkup(
     const rowX = rightBaseX + rowIndex * (boxes.width + boxes.gap);
     renderLeftRightRow(markup, rowItems, rowX, centerY, boxes.width, boxes.height, boxes.gap);
   });
+
+  renderCornerItems(
+    markup,
+    topLeftItems,
+    leftBaseX,
+    topBaseY,
+    -1,
+    -1,
+    boxes.width,
+    boxes.height,
+    boxes.gap
+  );
+  renderCornerItems(
+    markup,
+    topRightItems,
+    rightBaseX,
+    topBaseY,
+    1,
+    -1,
+    boxes.width,
+    boxes.height,
+    boxes.gap
+  );
+  renderCornerItems(
+    markup,
+    bottomLeftItems,
+    leftBaseX,
+    bottomBaseY,
+    -1,
+    1,
+    boxes.width,
+    boxes.height,
+    boxes.gap
+  );
+  renderCornerItems(
+    markup,
+    bottomRightItems,
+    rightBaseX,
+    bottomBaseY,
+    1,
+    1,
+    boxes.width,
+    boxes.height,
+    boxes.gap
+  );
 
   return markup;
 }
@@ -233,7 +283,7 @@ function sanitizeItems(items: BoxItemConfig[]): BoxItemConfig[] {
     }));
 }
 
-function buildItemsFromSideCounts(sideCounts: Record<BoxSide, number>): BoxItemConfig[] {
+function buildItemsFromSideCounts(sideCounts: Record<BoxEdgeSide, number>): BoxItemConfig[] {
   const items: BoxItemConfig[] = [];
 
   (["top", "bottom", "left", "right"] as const).forEach((side) => {
@@ -256,7 +306,16 @@ function getItemsForSide(items: BoxItemConfig[], side: BoxSide): BoxItemConfig[]
 }
 
 function isSide(value: unknown): value is BoxSide {
-  return value === "top" || value === "bottom" || value === "left" || value === "right";
+  return (
+    value === "top" ||
+    value === "bottom" ||
+    value === "left" ||
+    value === "right" ||
+    value === "top-left" ||
+    value === "top-right" ||
+    value === "bottom-left" ||
+    value === "bottom-right"
+  );
 }
 
 function clampInteger(value: number, min: number, max: number): number {
@@ -329,6 +388,33 @@ function renderLeftRightRow(
     markup.push(
       `<rect id="${getBoxShapeKey(box)}" x="${x}" y="${y}" width="${boxWidth}" height="${boxHeight}" rx="5" />`
     );
+  });
+}
+
+function renderCornerItems(
+  markup: string[],
+  items: BoxItemConfig[],
+  baseX: number,
+  baseY: number,
+  xDirection: 1 | -1,
+  yDirection: 1 | -1,
+  boxWidth: number,
+  boxHeight: number,
+  gap: number
+): void {
+  const xStep = boxWidth + gap;
+  const yStep = boxHeight + gap;
+  const rows = groupItemsByRow(items);
+
+  rows.forEach((rowItems, rowIndex) => {
+    const y = baseY + yDirection * rowIndex * yStep;
+
+    rowItems.forEach((box, index) => {
+      const x = baseX + xDirection * index * xStep;
+      markup.push(
+        `<rect id="${getBoxShapeKey(box)}" x="${x}" y="${y}" width="${boxWidth}" height="${boxHeight}" rx="5" />`
+      );
+    });
   });
 }
 
