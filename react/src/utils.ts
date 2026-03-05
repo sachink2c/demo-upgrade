@@ -32,7 +32,9 @@ export function getComputedStatus(
   percentage: number,
   thresholds: Thresholds = DEFAULT_THRESHOLDS
 ): SectionStatus {
-  if (section.status) return section.status;
+  // Keep BLOCKED as an explicit override; otherwise derive from occupancy numbers.
+  if (section.status === "BLOCKED") return "BLOCKED";
+  if (percentage >= 1) return "BLOCKED";
 
   if (percentage >= thresholds.fullPct) return "FULL";
   if (percentage >= thresholds.limitedPct) return "LIMITED";

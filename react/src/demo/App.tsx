@@ -168,7 +168,7 @@ export const App: React.FC = () => {
     <div className="app-container">
       <header className="app-header">
         <h1>Cricket Stadium Availability Map</h1>
-        <p className="subtitle">JSON-configured stands and boxes layout demo</p>
+        {/* <p className="subtitle">JSON-configured stands and boxes layout demo</p> */}
       </header>
 
       <div className="demo-controls">
