@@ -49,8 +49,8 @@ export function resolveLayoutConfig(
     left: sanitizeCount(configuredSideCounts.left, resolvedCountPerSide),
     right: sanitizeCount(configuredSideCounts.right, resolvedCountPerSide),
   };
-  const resolvedItems = (config.boxes.items ?? []).length > 0
-    ? sanitizeItems(config.boxes.items ?? [])
+  const resolvedItems = Array.isArray(config.boxes.items)
+    ? sanitizeItems(config.boxes.items)
     : buildItemsFromSideCounts(resolvedSideCounts);
 
   return {

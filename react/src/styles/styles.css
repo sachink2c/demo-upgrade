@@ -466,6 +466,25 @@
   font-size: var(--font-size-sm);
 }
 
+.api-status {
+  margin-bottom: var(--spacing-md);
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+}
+
+.api-status.ok {
+  background-color: #ecfdf5;
+  border: 1px solid #6ee7b7;
+  color: #065f46;
+}
+
+.api-status.error {
+  background-color: #fef2f2;
+  border: 1px solid #fca5a5;
+  color: #991b1b;
+}
+
 .map-wrapper {
   margin: var(--spacing-lg) 0;
 }
