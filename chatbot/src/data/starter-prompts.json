@@ -1,0 +1,84 @@
+[
+  {
+    "id": "sales-insights",
+    "label": "Sales Insights",
+    "items": [
+      {
+        "id": "pipeline-summary",
+        "label": "Pipeline Summary",
+        "children": [
+          {
+            "id": "open-opportunities",
+            "label": "Open Opportunities",
+            "prompt": "Summarize open opportunities by stage and highlight deals at risk this month."
+          },
+          {
+            "id": "revenue-forecast",
+            "label": "Revenue Forecast",
+            "prompt": "Create a short revenue forecast summary using current pipeline values and likely closures."
+          }
+        ]
+      },
+      {
+        "id": "account-health",
+        "label": "Account Health",
+        "children": [
+          {
+            "id": "expansion-candidates",
+            "label": "Expansion Candidates",
+            "prompt": "Identify accounts with expansion potential based on recent activity and product usage."
+          },
+          {
+            "id": "renewal-risks",
+            "label": "Renewal Risks",
+            "prompt": "List renewal accounts that look risky and explain the likely reasons."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "service-support",
+    "label": "Service & Support",
+    "items": [
+      {
+        "id": "case-triage",
+        "label": "Case Triage",
+        "children": [
+          {
+            "id": "priority-cases",
+            "label": "Priority Cases",
+            "prompt": "Show the top support cases that should be prioritized today and explain why."
+          },
+          {
+            "id": "sla-risks",
+            "label": "SLA Risks",
+            "prompt": "Which active cases are closest to breaching SLA and what actions should be taken first?"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "crm-automation",
+    "label": "CRM Automation",
+    "items": [
+      {
+        "id": "workflow-ideas",
+        "label": "Workflow Ideas",
+        "children": [
+          {
+            "id": "lead-routing",
+            "label": "Lead Routing",
+            "prompt": "Suggest a lead routing workflow for region, account size, and product interest."
+          },
+          {
+            "id": "follow-up-reminders",
+            "label": "Follow-up Reminders",
+            "prompt": "Draft an automation strategy for follow-up reminders on stale opportunities."
+          }
+        ]
+      }
+    ]
+  }
+]

@@ -1,0 +1,514 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CRM Chatbot UI</title>
+    <script type="module" crossorigin src="/assets/index-CxXVc_fb.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-CYyNuy3F.css">
+    <style>
+      .runtime-hidden {
+        display: none !important;
+      }
+
+      .runtime-prompt-backdrop {
+        position: absolute;
+        inset: 0;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        padding: 8px;
+        background: rgba(15, 23, 42, 0.18);
+        border-radius: 16px;
+        z-index: 1000;
+      }
+
+      .runtime-prompt-backdrop.open {
+        display: flex;
+      }
+
+      .runtime-prompt-shell {
+        width: min(100%, 300px);
+        max-height: min(54vh, 420px);
+        border: 1px solid rgba(148, 163, 184, 0.28);
+        border-radius: 16px;
+        padding: 10px;
+        background: rgba(255, 255, 255, 0.96);
+        box-shadow: 0 24px 60px rgba(15, 23, 42, 0.2);
+        backdrop-filter: blur(18px);
+      }
+
+      .runtime-prompt-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 14px;
+      }
+
+      .runtime-prompt-header h3,
+      .runtime-prompt-header p {
+        margin: 0;
+      }
+
+      .runtime-prompt-close,
+      .runtime-action-button,
+      .runtime-send-button,
+      .runtime-prompt-close-icon {
+        border: none;
+        border-radius: 10px;
+        font: inherit;
+      }
+
+      .runtime-prompt-close,
+      .runtime-action-button {
+        background: #e2e8f0;
+        color: #0f172a;
+      }
+
+      .runtime-prompt-close-icon {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 28px;
+        height: 28px;
+        padding: 0;
+        background: transparent;
+        color: #475569;
+        font-size: 1rem;
+        line-height: 1;
+        cursor: pointer;
+      }
+
+      .runtime-send-button {
+        min-width: 28px;
+        width: 28px;
+        height: 28px;
+        padding: 6px;
+        font-size: 0.82rem;
+        font-weight: 700;
+        color: #fff;
+        background: linear-gradient(135deg, #0f766e 0%, #2563eb 100%);
+        box-shadow: 0 12px 24px rgba(37, 99, 235, 0.22);
+        line-height: 1;
+      }
+
+      .runtime-send-inside {
+        position: absolute;
+        right: 8px;
+        bottom: 8px;
+      }
+
+      .runtime-send-icon {
+        width: 12px;
+        height: 12px;
+      }
+
+      .runtime-action-button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 28px;
+        height: 28px;
+        cursor: pointer;
+        font-size: 0.82rem;
+        font-weight: 700;
+      }
+
+      .runtime-action-group {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+
+      .runtime-composer-actions {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 6px;
+        padding: 0 2px;
+      }
+
+      #root {
+        justify-content: center !important;
+        align-items: flex-start !important;
+      }
+
+      .chatbot-page {
+        height: 100vh !important;
+        margin: 0 auto !important;
+        position: relative !important;
+      }
+
+      .chat-panel {
+        height: 100% !important;
+        gap: 8px !important;
+      }
+
+      .messages-panel {
+        border-radius: 16px !important;
+      }
+
+      .composer-panel {
+        border-radius: 16px !important;
+        padding: 4px 2px !important;
+        flex-shrink: 0 !important;
+        gap: 3px !important;
+      }
+
+      .runtime-messages-expanded {
+        position: relative;
+        min-height: 0;
+        max-height: none;
+        padding: 64px 4px 4px;
+        overflow: auto;
+      }
+
+      .runtime-floating-new-chat {
+        position: absolute;
+        top: 16px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 40px;
+        height: 40px;
+        padding: 0;
+        right: 16px;
+        border: none;
+        border-radius: 12px;
+        background: linear-gradient(135deg, #0f766e 0%, #2563eb 100%);
+        color: #fff;
+        box-shadow: 0 12px 24px rgba(37, 99, 235, 0.22);
+        font: inherit;
+        font-size: 1.4rem;
+        line-height: 1;
+        cursor: pointer;
+      }
+
+      .composer-box textarea {
+        width: 100%;
+        margin: 0;
+        min-height: 88px;
+        border-radius: 10px;
+        padding: 8px 36px 8px 12px !important;
+        font-size: 0.88rem;
+      }
+
+      .composer-box {
+        position: relative;
+        padding: 0 2px;
+      }
+
+      .message-text,
+      .message-paragraph {
+        font-size: 0.82rem;
+        overflow-wrap: anywhere;
+        word-break: break-word;
+      }
+
+      .message-card {
+        max-width: none !important;
+        width: 100% !important;
+        margin-bottom: 8px !important;
+        padding: 8px 6px !important;
+        border-radius: 12px !important;
+      }
+
+      .message-card.user {
+        margin-left: 0 !important;
+      }
+
+      .message-meta {
+        margin-bottom: 4px !important;
+        font-size: 0.82rem !important;
+      }
+
+      .message-text,
+      .message-paragraph {
+        margin-bottom: 4px !important;
+      }
+
+      .attachment-chip {
+        padding: 4px 8px !important;
+        font-size: 0.82rem !important;
+      }
+
+      .icon-action-button,
+      .send-button,
+      .dialog-close-button,
+      .prompt-use-button {
+        border-radius: 10px;
+      }
+
+      .prompt-tree {
+        margin: 6px 0 0;
+        padding-left: 0;
+        list-style: none;
+      }
+
+      .prompt-tree li {
+        margin-bottom: 6px;
+      }
+
+      .prompt-item-row {
+        padding: 6px 8px;
+        border-radius: 10px;
+        background: rgba(248, 250, 252, 0.92);
+      }
+
+      .prompt-item-label {
+        font-size: 0.88rem;
+      }
+
+      .prompt-use-button {
+        padding: 5px 8px !important;
+        font-size: 0.8rem !important;
+      }
+
+      .prompt-category + .prompt-category {
+        margin-top: 6px;
+      }
+
+      .runtime-category-toggle {
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+        padding: 8px 10px;
+        border: 1px solid rgba(203, 213, 225, 0.9);
+        border-radius: 10px;
+        background: rgba(248, 250, 252, 0.96);
+        color: #0f172a;
+        font: inherit;
+        font-weight: 600;
+        text-align: left;
+      }
+
+      .runtime-category-chevron {
+        color: #475569;
+        font-size: 0.95rem;
+      }
+
+      .starter-prompts-panel.runtime-prompt-panel {
+        max-height: calc(54vh - 72px);
+        overflow: auto;
+      }
+
+      .runtime-sr-only {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+        border: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script>
+      (() => {
+        const applyEmbeddedLayout = () => {
+          const page = document.querySelector(".chatbot-page");
+          const promptPanel = document.querySelector(".starter-prompts-panel");
+          const brandCard = document.querySelector(".brand-card");
+          const modeCard = document.querySelector(".mode-card");
+          const sidebar = document.querySelector(".sidebar");
+          const chatPanel = document.querySelector(".chat-panel");
+          const messagesPanel = document.querySelector(".messages-panel");
+          const composerPanel = document.querySelector(".composer-panel");
+          const composerActions = document.querySelector(".composer-actions");
+          const composerBox = document.querySelector(".composer-box");
+          const textarea = composerBox?.querySelector("textarea");
+
+          if (
+            !page ||
+            !promptPanel ||
+            !chatPanel ||
+            !messagesPanel ||
+            !composerPanel ||
+            !composerActions ||
+            !composerBox ||
+            !textarea
+          ) {
+            return false;
+          }
+
+          brandCard?.classList.add("runtime-hidden");
+          modeCard?.classList.add("runtime-hidden");
+          sidebar?.classList.add("runtime-hidden");
+          messagesPanel.classList.add("runtime-messages-expanded");
+
+          const oldPromptHeader = promptPanel.querySelector(".starter-prompts-header");
+          oldPromptHeader?.remove();
+
+          promptPanel.querySelectorAll(".prompt-category").forEach((category, index) => {
+            const title = category.querySelector("h4");
+            const tree = category.querySelector(".prompt-tree");
+            if (!title || !tree) {
+              return;
+            }
+
+            let toggle = category.querySelector(".runtime-category-toggle");
+            if (!toggle) {
+              toggle = document.createElement("button");
+              toggle.type = "button";
+              toggle.className = "runtime-category-toggle";
+              toggle.innerHTML = `<span>${title.textContent ?? ""}</span><span class="runtime-category-chevron">+</span>`;
+              title.replaceWith(toggle);
+            }
+
+            const chevron = toggle.querySelector(".runtime-category-chevron");
+            if (!toggle.dataset.bound) {
+              toggle.addEventListener("click", () => {
+                const isOpen = tree.style.display !== "none";
+                promptPanel.querySelectorAll(".prompt-category > .prompt-tree").forEach((list) => {
+                  list.style.display = "none";
+                });
+                promptPanel.querySelectorAll(".runtime-category-chevron").forEach((icon) => {
+                  icon.textContent = "+";
+                });
+
+                if (!isOpen) {
+                  tree.style.display = "block";
+                  if (chevron) {
+                    chevron.textContent = "-";
+                  }
+                }
+              });
+              toggle.dataset.bound = "true";
+            }
+
+            tree.style.display = "none";
+            if (chevron) {
+              chevron.textContent = "+";
+            }
+          });
+
+          let legacyNewChatButton = document.querySelector(".sidebar .new-chat-button");
+          let floatingNewChatButton = messagesPanel.querySelector(".runtime-floating-new-chat");
+          if (!floatingNewChatButton && legacyNewChatButton) {
+            floatingNewChatButton = legacyNewChatButton;
+            floatingNewChatButton.className = "runtime-floating-new-chat";
+            floatingNewChatButton.textContent = "+";
+            floatingNewChatButton.setAttribute("aria-label", "Start new chat session");
+            floatingNewChatButton.setAttribute("title", "Start new chat session");
+            messagesPanel.prepend(floatingNewChatButton);
+          }
+
+          let backdrop = document.querySelector(".runtime-prompt-backdrop");
+          if (!backdrop) {
+            backdrop = document.createElement("div");
+            backdrop.className = "runtime-prompt-backdrop";
+            backdrop.innerHTML = `
+              <div class="runtime-prompt-shell">
+                <div class="runtime-prompt-header">
+                  <div>
+                    <h3>Starter prompts</h3>
+                    <p>Choose a prompt to prefill the message box</p>
+                  </div>
+                  <button type="button" class="runtime-prompt-close-icon" aria-label="Close starter prompts" title="Close">x</button>
+                </div>
+              </div>
+            `;
+            document.body.appendChild(backdrop);
+            backdrop.addEventListener("click", (event) => {
+              if (event.target === backdrop) {
+                backdrop.classList.remove("open");
+              }
+            });
+            backdrop.querySelector(".runtime-prompt-close-icon")?.addEventListener("click", () => {
+              backdrop.classList.remove("open");
+            });
+          }
+
+          const shell = backdrop.querySelector(".runtime-prompt-shell");
+          if (shell && promptPanel.parentElement !== shell) {
+            promptPanel.classList.add("runtime-prompt-panel");
+            shell.appendChild(promptPanel);
+          }
+
+          const sendButton =
+            composerBox.querySelector("button") ??
+            composerPanel.querySelector(".send-button") ??
+            composerActions.querySelector("button");
+          const attachLabel = composerActions.querySelector("label.attach-button");
+          if (!sendButton || !attachLabel) {
+            return false;
+          }
+
+          composerPanel.appendChild(composerActions);
+          composerActions.className = "runtime-composer-actions";
+
+          let actionGroup = composerActions.querySelector(".runtime-action-group");
+          if (!actionGroup) {
+            actionGroup = document.createElement("div");
+            actionGroup.className = "runtime-action-group";
+            composerActions.prepend(actionGroup);
+          }
+
+          let promptButton = composerActions.querySelector(".runtime-prompt-trigger");
+          if (!promptButton) {
+            promptButton = document.createElement("button");
+            promptButton.type = "button";
+            promptButton.className = "runtime-action-button runtime-prompt-trigger";
+            promptButton.textContent = "?";
+            promptButton.title = "Starter prompts";
+            promptButton.setAttribute("aria-label", "Open starter prompts");
+            promptButton.addEventListener("click", () => {
+              backdrop.classList.add("open");
+            });
+            actionGroup.appendChild(promptButton);
+          }
+
+          attachLabel.className = "runtime-action-button";
+          attachLabel.title = "Attach file";
+          attachLabel.innerHTML = '<span aria-hidden="true">+</span><span class="runtime-sr-only">Attach file</span>';
+          const fileInput = composerActions.querySelector('input[type="file"]');
+          if (fileInput && !attachLabel.contains(fileInput)) {
+            attachLabel.appendChild(fileInput);
+          }
+          if (!actionGroup.contains(attachLabel)) {
+            actionGroup.appendChild(attachLabel);
+          }
+
+          sendButton.className = "runtime-send-button";
+          sendButton.classList.add("runtime-send-inside");
+          sendButton.innerHTML = sendButton.disabled
+            ? "..."
+            : '<svg viewBox="0 0 16 16" aria-hidden="true" class="runtime-send-icon"><path d="M2.2 13.8L14 8 2.2 2.2l1.6 4.6L10 8l-6.2 1.2-1.6 4.6z" fill="currentColor"></path></svg>';
+          sendButton.setAttribute("aria-label", sendButton.disabled ? "Sending message" : "Send message");
+          sendButton.setAttribute("title", sendButton.disabled ? "Sending..." : "Send");
+          if (sendButton.parentElement !== composerBox) {
+            composerBox.appendChild(sendButton);
+          }
+
+          if (!textarea.dataset.enterBound) {
+            textarea.addEventListener("keydown", (event) => {
+              if (event.key === "Enter" && !event.shiftKey) {
+                event.preventDefault();
+                sendButton.click();
+              }
+            });
+            textarea.dataset.enterBound = "true";
+          }
+
+          return true;
+        };
+
+        const observer = new MutationObserver(() => {
+          if (applyEmbeddedLayout()) {
+            observer.disconnect();
+          }
+        });
+
+        observer.observe(document.body, { childList: true, subtree: true });
+        applyEmbeddedLayout();
+      })();
+    </script>
+  </body>
+</html>
