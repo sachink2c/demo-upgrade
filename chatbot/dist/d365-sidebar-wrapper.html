@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CRM Chatbot - Sidebar</title>
+    <link rel="stylesheet" href="./assets/index-B2vgKZM9.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        html, body {
+            height: 100%;
+            width: 100%;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+        }
+        
+        #root {
+            height: 100%;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        
+        /* Ensure proper Dynamics 365 context */
+        body {
+            background: transparent;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+    
+    <script>
+        // Dynamics 365 Context Integration
+        window.D365Context = {
+            // Extract context from parent Dynamics 365 window
+            getContext: function() {
+                try {
+                    if (window.parent && window.parent.Xrm) {
+                        return window.parent.Xrm.Utility.getGlobalContext();
+                    }
+                } catch (e) {
+                    console.warn('Could not access Dynamics 365 context:', e);
+                }
+                return null;
+            },
+            
+            // Get entity information
+            getEntityContext: function() {
+                try {
+                    if (window.parent && window.parent.Xrm && window.parent.Xrm.Page) {
+                        return {
+                            entityId: window.parent.Xrm.Page.data.entity.getId(),
+                            entityName: window.parent.Xrm.Page.data.entity.getEntityName(),
+                            recordName: window.parent.Xrm.Page.data.entity.getPrimaryAttributeValue ? window.parent.Xrm.Page.data.entity.getPrimaryAttributeValue() : null
+                        };
+                    }
+                } catch (e) {
+                    console.warn('Could not access entity context:', e);
+                }
+                return null;
+            },
+            
+            // Get user information
+            getUserInfo: function() {
+                try {
+                    if (window.parent && window.parent.Xrm) {
+                        const context = window.parent.Xrm.Utility.getGlobalContext();
+                        return {
+                            userId: context.userSettings.userId,
+                            userName: context.userSettings.userName,
+                            organizationUrl: context.getClientUrl()
+                        };
+                    }
+                } catch (e) {
+                    console.warn('Could not access user info:', e);
+                }
+                return null;
+            }
+        };
+        
+        // Make context available to React app
+        window.dynamicsContext = {
+            globalContext: window.D365Context.getContext(),
+            entityContext: window.D365Context.getEntityContext(),
+            userInfo: window.D365Context.getUserInfo()
+        };
+        
+        console.log('Dynamics 365 Context initialized:', window.dynamicsContext);
+    </script>
+    
+    <!-- Load React App -->
+    <script type="module" src="./assets/index-Ckfx7zdp.js"></script>
+</body>
+</html>
