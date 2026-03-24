@@ -1,4 +1,4 @@
-import type {
+﻿import type {
   Attachment,
   ChatApiRequest,
   ChatApiResponse,
@@ -46,6 +46,73 @@ export const fileListToAttachments = (files: FileList | null): Attachment[] => {
 const buildMockBlocks = (message: string): MessageBlock[] => {
   const normalized = message.toLowerCase();
 
+  if (normalized.includes("account status")) {
+    return [
+      {
+        type: "text",
+        text: "Here is the current account health overview. Three accounts are healthy, one is at risk, and one needs immediate intervention."
+      },
+      {
+        type: "table",
+        columns: ["Account Name", "Annual Revenue", "Health Status", "Next Action"],
+        rows: [
+          ["Contoso LLC", "$2.4M", "Healthy", "Upsell opportunities"],
+          ["Northwind Traders", "$1.8M", "At Risk", "Schedule renewal meeting"],
+          ["Fabrikam Inc", "$950K", "Watch", "Executive sync required"],
+          ["Tailwind Cycles", "$3.2M", "Healthy", "Contract review pending"],
+          ["Adventure Works", "$1.1M", "Critical", "Urgent executive call"]
+        ]
+      }
+    ];
+  }
+
+  if (normalized.includes("pipeline forecast")) {
+    return [
+      {
+        type: "text",
+        text:
+          "## Pipeline Forecast\n\nPipeline forecast shows stronger momentum in the second half of the year. The weighted pipeline stands at **$12.5M**, with Q3 carrying the largest share of expected bookings."
+      },
+      {
+        type: "chart",
+        title: "Quarterly Pipeline Forecast",
+        variant: "bar",
+        series: [
+          { label: "Q1 2026", value: 2800000 },
+          { label: "Q2 2026", value: 3200000 },
+          { label: "Q3 2026", value: 4100000 },
+          { label: "Q4 2026", value: 2400000 }
+        ]
+      },
+      {
+        type: "chart",
+        title: "Pipeline Mix by Quarter",
+        variant: "pie",
+        series: [
+          { label: "Q1 2026", value: 2800000 },
+          { label: "Q2 2026", value: 3200000 },
+          { label: "Q3 2026", value: 4100000 },
+          { label: "Q4 2026", value: 2400000 }
+        ]
+      },
+      {
+        type: "text",
+        text:
+          "## Highlights\n\n- Q3 leads the forecast with the highest concentration of late-stage opportunities.\n- Q2 and Q4 keep the revenue curve balanced.\n- Resourcing should be biased toward Q3 execution and Q4 renewal protection."
+      }
+    ];
+  }
+
+  if (normalized.includes("opportunity summary")) {
+    return [
+      {
+        type: "text",
+        text:
+          "## Opportunity Summary\n\nThe pipeline is anchored by **Global Bank Expansion ($850K)** in negotiation and **Tech Corp Migration ($1.2M)** in proposal stage. These are the most material near-term opportunities and deserve focused executive attention. Healthcare Network remains a promising early-stage deal, while Retail Regional is viable but timing-sensitive due to budget approval.\n\n## Risk Assessment\n\n- **High risk:** Global Bank Expansion is blocked on legal review and may slip if approval is not escalated this week.\n- **Medium risk:** Tech Corp Migration is in an active competitive cycle with two vendors, which increases pressure on differentiation and stakeholder alignment.\n- **Medium risk:** Retail Regional depends on CFO budget sign-off, creating forecast uncertainty.\n- **Low risk:** Healthcare Network is early in discovery, with more qualification risk than delivery risk right now.\n\n## Recommended Next Steps\n\n1. Escalate legal support for Global Bank Expansion within 48 hours.\n2. Run an executive-sponsored value conversation for Tech Corp Migration.\n3. Validate budget timing with Retail Regional before increasing confidence.\n4. Continue discovery with Healthcare Network and tighten qualification criteria."
+      }
+    ];
+  }
+
   if (normalized.includes("chart") || normalized.includes("graph")) {
     return [
       {
@@ -55,6 +122,7 @@ const buildMockBlocks = (message: string): MessageBlock[] => {
       {
         type: "chart",
         title: "Quarterly Pipeline Value",
+        variant: "bar",
         series: [
           { label: "Q1", value: 42 },
           { label: "Q2", value: 67 },
@@ -111,7 +179,7 @@ const buildMockBlocks = (message: string): MessageBlock[] => {
   return [
     {
       type: "text",
-      text: `Mock mode reply for: "${message}". Later, replace this handler with your backend endpoint that invokes Azure AI Foundry and returns structured blocks.`
+      text: `Mock mode reply for: "${message}". Try "Show me account status overview", "Display pipeline forecast by quarter", or "Provide opportunity summary with risk assessment" to see different response types.`
     }
   ];
 };

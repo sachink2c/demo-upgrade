@@ -32,6 +32,7 @@ export type ChartDatum = {
 export type ChartBlock = {
   type: "chart";
   title?: string;
+  variant?: "bar" | "pie";
   series: ChartDatum[];
 };
 

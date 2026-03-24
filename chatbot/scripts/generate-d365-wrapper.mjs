@@ -1,10 +1,26 @@
-<!DOCTYPE html>
+import { promises as fs } from "node:fs";
+import path from "node:path";
+
+const rootDir = process.cwd();
+const distDir = path.join(rootDir, "dist");
+const assetsDir = path.join(distDir, "assets");
+const wrapperPath = path.join(distDir, "d365-sidebar-wrapper.html");
+
+const assetFiles = await fs.readdir(assetsDir);
+const cssFile = assetFiles.find((file) => /^index-.*\.css$/.test(file));
+const jsFile = assetFiles.find((file) => /^index-.*\.js$/.test(file) && !file.endsWith(".js.map"));
+
+if (!cssFile || !jsFile) {
+  throw new Error("Could not find built CSS/JS assets in dist/assets.");
+}
+
+const wrapperHtml = `<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>CRM Chatbot - Sidebar</title>
-  <link rel="stylesheet" href="./assets/index-DxLSFgL9.css">
+  <link rel="stylesheet" href="./assets/${cssFile}">
   <style>
     * {
       margin: 0;
@@ -95,6 +111,10 @@
     console.log("Dynamics 365 Context initialized:", window.dynamicsContext);
   </script>
 
-  <script type="module" src="./assets/index-qeC4nFsm.js"></script>
+  <script type="module" src="./assets/${jsFile}"></script>
 </body>
 </html>
+`;
+
+await fs.writeFile(wrapperPath, wrapperHtml, "utf8");
+console.log(`Generated ${path.relative(rootDir, wrapperPath)} using ${jsFile} and ${cssFile}`);

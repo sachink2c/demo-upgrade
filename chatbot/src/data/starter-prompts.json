@@ -1,5 +1,32 @@
 [
   {
+    "id": "demo-responses",
+    "label": "Demo Responses",
+    "items": [
+      {
+        "id": "showcase",
+        "label": "Showcase",
+        "children": [
+          {
+            "id": "demo-table",
+            "label": "Account Status Table",
+            "prompt": "Show me account status overview"
+          },
+          {
+            "id": "demo-chart",
+            "label": "Pipeline Chart",
+            "prompt": "Display pipeline forecast by quarter"
+          },
+          {
+            "id": "demo-summary",
+            "label": "Executive Summary",
+            "prompt": "Provide opportunity summary with risk assessment"
+          }
+        ]
+      }
+    ]
+  },
+  {
     "id": "sales-insights",
     "label": "Sales Insights",
     "items": [

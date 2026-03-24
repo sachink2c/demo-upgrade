@@ -249,6 +249,24 @@ button {
   word-break: break-word;
 }
 
+.formatted-heading {
+  margin: 0 0 6px;
+  font-size: 0.84rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.formatted-list {
+  margin: 0 0 6px;
+  padding-left: 18px;
+  font-size: 0.82rem;
+  color: #1e293b;
+}
+
+.formatted-list li + li {
+  margin-top: 4px;
+}
+
 .attachment-list,
 .pending-attachments {
   display: flex;
@@ -341,6 +359,7 @@ button {
 .result-table {
   width: 100%;
   border-collapse: collapse;
+  font-size: 0.88rem;
 }
 
 .result-table th,
@@ -348,6 +367,7 @@ button {
   padding: 10px 12px;
   border-bottom: 1px solid #e2e8f0;
   text-align: left;
+  font-size: 0.88rem;
 }
 
 .chart-block h4 {
@@ -377,6 +397,46 @@ button {
   height: 100%;
   border-radius: 999px;
   background: linear-gradient(135deg, #0f766e 0%, #2563eb 100%);
+}
+
+.pie-chart-layout {
+  display: grid;
+  grid-template-columns: 112px minmax(0, 1fr);
+  gap: 12px;
+  align-items: center;
+}
+
+.pie-chart {
+  width: 112px;
+  height: 112px;
+}
+
+.pie-chart-legend {
+  display: grid;
+  gap: 8px;
+}
+
+.pie-legend-row {
+  display: grid;
+  grid-template-columns: 10px minmax(0, 1fr) auto;
+  gap: 8px;
+  align-items: center;
+  font-size: 0.82rem;
+}
+
+.pie-legend-swatch {
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+}
+
+.pie-legend-label {
+  min-width: 0;
+}
+
+.pie-legend-value {
+  color: #475569;
+  font-weight: 600;
 }
 
 .composer-actions {
@@ -529,11 +589,12 @@ button {
     flex-wrap: wrap;
   }
 
-  .send-button {
-    width: 100%;
-  }
-
   .starter-prompts-dialog {
     padding: 16px;
+  }
+
+  .pie-chart-layout {
+    grid-template-columns: 1fr;
+    justify-items: center;
   }
 }
