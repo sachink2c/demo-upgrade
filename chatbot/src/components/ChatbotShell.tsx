@@ -206,6 +206,22 @@ export const ChatbotShell = ({
               <ResponseRenderer blocks={message.blocks} />
             </article>
           ))}
+          {isSending ? (
+            <article className="message-card assistant thinking-message" aria-live="polite">
+              <div className="message-meta">
+                <strong>Assistant</strong>
+                <span>Thinking</span>
+              </div>
+              <div className="thinking-indicator" aria-label="Assistant is thinking">
+                <span className="thinking-label">Thinking</span>
+                <span className="thinking-dots" aria-hidden="true">
+                  <span />
+                  <span />
+                  <span />
+                </span>
+              </div>
+            </article>
+          ) : null}
           <div ref={messagesEndRef} />
         </div>
 
